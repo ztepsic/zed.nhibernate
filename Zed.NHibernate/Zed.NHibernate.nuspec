@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://raw.githubusercontent.com/ztepsic/zed.nhibernate/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/ztepsic/zed.nhibernate</projectUrl>
+    <iconUrl>https://github.com/ztepsic/zed.nhibernate</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>$description$</releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>Zed NHibernate</tags>
+  </metadata>
+</package>
