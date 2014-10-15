@@ -1,4 +1,5 @@
-﻿using NHibernate;
+﻿using System;
+using NHibernate;
 
 namespace Zed.NHibernate {
     /// <summary>
@@ -28,6 +29,10 @@ namespace Zed.NHibernate {
         /// </summary>
         /// <param name="sessionFactory">NHibernate session factory</param>
         protected NHibernateRepository(ISessionFactory sessionFactory) {
+            if (sessionFactory == null) {
+                throw new ArgumentNullException("sessionFactory");
+            }
+
             this.sessionFactory = sessionFactory;
         }
 
