@@ -13,12 +13,12 @@ namespace Zed.NHibernate {
         /// <summary>
         /// Session factory
         /// </summary>
-        private readonly ISessionFactory sessionFactory;
+        protected readonly ISessionFactory SessionFactory;
 
         /// <summary>
         /// Gets Session
         /// </summary>
-        protected ISession Session { get { return sessionFactory.GetCurrentSession(); } }
+        protected virtual ISession Session { get { return SessionFactory.GetCurrentSession(); } }
 
         #endregion
 
@@ -33,7 +33,7 @@ namespace Zed.NHibernate {
                 throw new ArgumentNullException("sessionFactory");
             }
 
-            this.sessionFactory = sessionFactory;
+            this.SessionFactory = sessionFactory;
         }
 
         #endregion
