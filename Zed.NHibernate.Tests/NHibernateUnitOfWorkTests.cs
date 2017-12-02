@@ -27,10 +27,10 @@ namespace Zed.NHibernate.Tests {
             }
         }
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void FixtureSetup() { OnFixtureSetup(); }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void FixtureTearDown() { OnFixtureTeardown(); }
 
         [SetUp]

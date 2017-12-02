@@ -37,8 +37,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Iesi.Collections.4.0.1.4000\lib\net40\Iesi.Collections.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.5\lib\net45-full\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="NHibernate, Version=4.0.0.4000, Culture=neutral, PublicKeyToken=aa95f207798dfdb4, processorArchitecture=MSIL">
@@ -52,8 +52,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Zed, Version=1.1.0.23, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Zed.1.1.0.23\lib\net461\Zed.dll</HintPath>
+    <Reference Include="Zed, Version=1.1.1.29, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Zed.1.1.1.29\lib\net461\Zed.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -71,7 +71,11 @@
     <Compile Include="Test\TestConnectionProvider.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="nuspec.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
+    <None Include="Zed.NHibernate.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
