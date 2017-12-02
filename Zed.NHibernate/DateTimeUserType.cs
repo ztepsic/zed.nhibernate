@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Data;
+using System.Data.Common;
 using NHibernate;
+using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
 
@@ -8,6 +9,7 @@ namespace Zed.NHibernate {
     /// <summary>
     /// NHibernate user type for dateTime2 SQL Server type
     /// </summary>
+    [Obsolete("Not used anymore. From NHibernate v5.0 DateTime does not more cut fractal seconds.", false)]
     [Serializable]
     public class DateTimeUserType : IUserType {
 
@@ -44,56 +46,55 @@ namespace Zed.NHibernate {
         #region Methods
 
         /// <summary>
-        /// Retrieve an instance of the mapped class from a JDBC resultset.
-        ///             Implementors should handle possibility of null values.
+        /// Retrieve an instance of the mapped class from an ADO resultset. Implementors
+        /// should handle possibility of null values.
         /// </summary>
-        /// <param name="rs">a IDataReader</param><param name="names">column names</param><param name="owner">the containing entity</param>
-        /// <returns/>
+        /// <param name="rs">a DbDataReader</param>
+        /// <param name="names">column names</param>
+        /// <param name="session">
+        /// The session for which the operation is done. Allows access to Factory.Dialect
+        /// and Factory.ConnectionProvider.Driver for adjusting to database or data provider
+        /// capabilities.
+        /// </param>
+        /// <param name="owner">the containing entity</param>
+        /// <returns>The value.</returns>
         /// <exception cref="T:NHibernate.HibernateException">HibernateException</exception>
-        public object NullSafeGet(IDataReader rs, string[] names, object owner) {
-            object obj = NHibernateUtil.DateTime.NullSafeGet(rs, names[0]);
-            if (obj == null) {
-                return null;
-            }
+        public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner) {
+            object obj = NHibernateUtil.DateTime.NullSafeGet(rs, names[0], session, owner);
 
-            DateTime dateTime = (DateTime)obj;
-            DateTime dateTime2 = dateTime;
-            if (dateTime.Year == 1753 && dateTime.Month == 1 && dateTime.Day == 1
-                && dateTime.Hour == 0 && dateTime.Minute == 0 && dateTime.Second == 0 && dateTime.Millisecond == 0) {
-                dateTime2 = dateTime.AddYears(-1752); // 1753 - 1752 = 0001;	
-            }
-
-            return dateTime2;
+            return (DateTime?) obj;
         }
 
+       
         /// <summary>
-        /// Write an instance of the mapped class to a prepared statement.
-        ///             Implementors should handle possibility of null values.
-        ///             A multi-column type should be written to parameters starting from index.
+        /// Write an instance of the mapped class to a prepared statement. Implementors should
+        /// handle possibility of null values. A multi-column type should be written to parameters
+        /// starting from index.
         /// </summary>
-        /// <param name="cmd">a IDbCommand</param><param name="value">the object to write</param><param name="index">command parameter index</param><exception cref="T:NHibernate.HibernateException">HibernateException</exception>
-        public void NullSafeSet(IDbCommand cmd, object value, int index) {
+        /// <param name="cmd">a DbCommand</param>
+        /// <param name="value">the object to write</param>
+        /// <param name="index">command parameter index</param>
+        /// <param name="session">
+        /// The session for which the operation is done. Allows access to Factory.Dialect
+        /// and Factory.ConnectionProvider.Driver for adjusting to database or data provider
+        /// capabilities.
+        /// </param>
+        /// <exception cref="T:NHibernate.HibernateException">HibernateException</exception>
+        public void NullSafeSet(DbCommand cmd, object value, int index, ISessionImplementor session) {
             if (value == null) {
-                ((IDataParameter)cmd.Parameters[index]).Value = DBNull.Value;
+                cmd.Parameters[index].Value = DBNull.Value;
             } else {
-                DateTime dateTime2 = (DateTime)value;
-                DateTime dateTime = dateTime2;
-                if (dateTime2.Year == 1 && dateTime2.Month == 1 && dateTime2.Day == 1 &&
-                    dateTime2.Hour == 0 && dateTime2.Minute == 0 && dateTime2.Second == 0 && dateTime2.Millisecond == 0) {
-                    dateTime = dateTime2.AddYears(1752); // 0001 + 1752 = 1753	
-                }
-
-                ((IDataParameter)cmd.Parameters[index]).Value = dateTime;
+                cmd.Parameters[index].Value = (DateTime)value;
             }
         }
 
         /// <summary>
         /// During merge, replace the existing (<paramref name="target"/>) value in the entity
-        ///             we are merging to with a new (<paramref name="original"/>) value from the detached
-        ///             entity we are merging. For immutable objects, or null values, it is safe to simply
-        ///             return the first parameter. For mutable objects, it is safe to return a copy of the
-        ///             first parameter. For objects with component values, it might make sense to
-        ///             recursively replace component values.
+        /// we are merging to with a new (<paramref name="original"/>) value from the detached
+        /// entity we are merging. For immutable objects, or null values, it is safe to simply
+        /// return the first parameter. For mutable objects, it is safe to return a copy of the
+        /// first parameter. For objects with component values, it might make sense to
+        /// recursively replace component values.
         /// </summary>
         /// <param name="original">the value from the detached entity being merged</param><param name="target">the value in the managed entity</param><param name="owner">the managed entity</param>
         /// <returns>
@@ -105,7 +106,7 @@ namespace Zed.NHibernate {
 
         /// <summary>
         /// Reconstruct an object from the cacheable representation. At the very least this
-        ///             method should perform a deep copy if the type is mutable. (optional operation)
+        /// method should perform a deep copy if the type is mutable. (optional operation)
         /// </summary>
         /// <param name="cached">the object to be cached</param><param name="owner">the owner of the cached object</param>
         /// <returns>
@@ -117,9 +118,9 @@ namespace Zed.NHibernate {
 
         /// <summary>
         /// Transform the object into its cacheable representation. At the very least this
-        ///             method should perform a deep copy if the type is mutable. That may not be enough
-        ///             for some implementations, however; for example, associations must be cached as
-        ///             identifier values. (optional operation)
+        /// method should perform a deep copy if the type is mutable. That may not be enough
+        /// for some implementations, however; for example, associations must be cached as
+        /// identifier values. (optional operation)
         /// </summary>
         /// <param name="value">the object to be cached</param>
         /// <returns>
@@ -142,7 +143,7 @@ namespace Zed.NHibernate {
 
         /// <summary>
         /// Compare two instances of the class mapped by this type for persistent "equality"
-        ///             ie. equality of persistent state
+        /// ie. equality of persistent state
         /// </summary>
         /// <param name="x"/><param name="y"/>
         /// <returns/>
