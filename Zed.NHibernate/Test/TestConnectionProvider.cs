@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 using NHibernate.Connection;
 
 namespace Zed.NHibernate.Test {
@@ -10,12 +13,12 @@ namespace Zed.NHibernate.Test {
 
         #region Fields and Properties
 
-        private static IDbConnection connection;
+        private static DbConnection connection;
 
         /// <summary>
         /// Create connection func
         /// </summary>
-        public static Func<string, IDbConnection> CreateConnectionFunc { get; set; }
+        public static Func<string, DbConnection> CreateConnectionFunc { get; set; }
 
         #endregion
 
@@ -27,7 +30,7 @@ namespace Zed.NHibernate.Test {
         /// <returns>
         /// An open <see cref="T:System.Data.IDbConnection"/>.
         /// </returns>
-        public override IDbConnection GetConnection() {
+        public override DbConnection GetConnection() {
             if (connection == null) {
                 // new connection
                 connection = CreateConnectionFunc(ConnectionString);
@@ -42,10 +45,29 @@ namespace Zed.NHibernate.Test {
         }
 
         /// <summary>
+        /// Get an open System.Data.Common.DbConnection.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the work</param>
+        /// <returns> An open System.Data.Common.DbConnection.</returns>
+        public override async Task<DbConnection> GetConnectionAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (connection == null) {
+                // new connection
+                connection = CreateConnectionFunc(ConnectionString);
+            }
+
+            if (connection.State != ConnectionState.Open) {
+                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return connection;
+        }
+
+        /// <summary>
         /// Close database connection
         /// </summary>
         /// <param name="conn"></param>
-        public override void CloseConnection(IDbConnection conn) {
+        public override void CloseConnection(DbConnection conn) {
             // ignore closing the connection
             // connection'll be closed by calling CloseDatabase by the and of TestFixture
         }
@@ -54,9 +76,7 @@ namespace Zed.NHibernate.Test {
         /// Close database
         /// </summary>
         public static void CloseDatabase() {
-            if (connection != null) {
-                connection.Close();
-            }
+            connection?.Close();
         }
 
         #endregion

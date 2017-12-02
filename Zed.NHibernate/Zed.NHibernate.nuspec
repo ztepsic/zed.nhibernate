@@ -16,7 +16,7 @@
     <tags>Zed NHibernate</tags>
     <dependencies>
       <dependency id="Zed" version="[1.0,)" />
-      <dependency id="NHibernate" version="[4.0, 5.0)" />
+      <dependency id="NHibernate" version="[5.0,)" />
     </dependencies>
   </metadata>
 </package>
