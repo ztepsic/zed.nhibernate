@@ -25,10 +25,10 @@ namespace Zed.NHibernate.Test {
         #region Methods
 
         /// <summary>
-        /// Get an open <see cref="T:System.Data.IDbConnection"/>.
+        /// Get an open <see cref="T:System.Data.DbConnection"/>.
         /// </summary>
         /// <returns>
-        /// An open <see cref="T:System.Data.IDbConnection"/>.
+        /// An open <see cref="T:System.Data.DbConnection"/>.
         /// </returns>
         public override DbConnection GetConnection() {
             if (connection == null) {
