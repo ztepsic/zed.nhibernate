@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Threading.Tasks;
 using NHibernate.Bytecode;
 using NHibernate.Cfg;
 using NHibernate.Dialect;
@@ -49,6 +50,18 @@ namespace Zed.NHibernate.Tests.Test {
             // Act
             using (var trx = Session.BeginTransaction()) {
                 trx.Rollback();
+            }
+
+            // Assert
+        }
+
+        [Test]
+        public async Task OpenSessionAndTransaction_TransactionRolledbackAsync() {
+            // Arrange
+
+            // Act
+            using (var trx = Session.BeginTransaction()) {
+                await trx.RollbackAsync();
             }
 
             // Assert

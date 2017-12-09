@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using NHibernate;
 using NHibernate.Context;
 using Zed.Transaction;
@@ -55,6 +57,30 @@ namespace Zed.NHibernate {
                 : dependentScopeFactory();
 
             scope.BeginTransaction();
+            return scope;
+        }
+
+        /// <summary>
+        /// Starts async unit of work scope
+        /// </summary>
+        /// <returns>Unit of work scope</returns>
+        public async Task<IUnitOfWorkScope> StartAsync() {
+            return await StartAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Starts async unit of work scope
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>Unit of work scope</returns>
+        public async Task<IUnitOfWorkScope> StartAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            IUnitOfWorkScope scope = !CurrentSessionContext.HasBind(sessionFactory)
+                ? rootScopeFactory()
+                : dependentScopeFactory();
+
+            await scope.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
             return scope;
         }
 

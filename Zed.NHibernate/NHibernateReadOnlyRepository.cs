@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using NHibernate;
 using Zed.Domain;
 
@@ -52,12 +54,54 @@ namespace Zed.NHibernate {
         }
 
         /// <summary>
+        /// This is the asynchronous version of <see cref="GetAll()"/>.
+        /// Gets all persisted entities/aggregate roots
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>All persisted entities/aggregate roots</returns>
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ICriteria criteria = Session.CreateCriteria(typeof(TEntity));
+            return await criteria.ListAsync<TEntity>(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// This is the asynchronous version of <see cref="GetAll()"/>.
+        /// Gets all persisted entities/aggregate roots
+        /// </summary>
+        /// <returns>All persisted entities/aggregate roots</returns>
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync() {
+            return await GetAllAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Gets entity/aggregate root bases on it's identity.
         /// </summary>
         /// <param name="id">Entity/Aggregat root identifier</param>
         /// <returns>Entity/aggregate root</returns>
         public virtual TEntity GetById(TId id) {
             return Session.Get<TEntity>(id);
+        }
+
+        /// <summary>
+        /// This is the asynchronous version of <see cref="GetById"/>.
+        /// Gets entity/aggregate root bases on it's identity.
+        /// </summary>
+        /// <param name="id">Entity/Aggregat root identifier</param>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>Entity/aggregate root</returns>
+        public virtual async Task<TEntity> GetByIdAsync(TId id, CancellationToken cancellationToken) {
+            return await Session.GetAsync<TEntity>(id, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets entity/aggregate root bases on it's identity.
+        /// </summary>
+        /// <param name="id">Entity/Aggregat root identifier</param>
+        /// <returns>Entity/aggregate root</returns>
+        public virtual async Task<TEntity> GetByIdAsync(TId id) {
+            return await GetByIdAsync(id, CancellationToken.None).ConfigureAwait(false);
         }
 
         #endregion

@@ -66,17 +66,17 @@ namespace Zed.NHibernate.Test {
         /// <summary>
         /// Setup NHibernate session
         /// </summary>
-        protected void SetupNHibernateSession() {
+        protected virtual void SetupNHibernateSession() {
             TestConnectionProvider.CloseDatabase();
             NHibernateSessionProvider.Init();
             setupContextualSession();
-            buildSchema();
+            BuildSchema();
         }
 
         /// <summary>
         /// Tear down NHibernate session
         /// </summary>
-        protected void TearDownNHibernateSession() {
+        protected virtual void TearDownNHibernateSession() {
             tearDownContextualSession();
             TestConnectionProvider.CloseDatabase();
         }
@@ -92,11 +92,12 @@ namespace Zed.NHibernate.Test {
             session.Close();
         }
 
-        private void buildSchema() {
+        protected void BuildSchema() {
             var cfg = Configuration;
             var schemaExport = new SchemaExport(cfg);
-            //schemaExport.Create(false, true);
-            schemaExport.Execute(false, true, false, Session.Connection, null);
+            ////schemaExport.Create(false, true);
+            //schemaExport.Execute(false, true, false, Session.Connection, null);
+            schemaExport.Execute(false, true, false);
         }
 
         #endregion

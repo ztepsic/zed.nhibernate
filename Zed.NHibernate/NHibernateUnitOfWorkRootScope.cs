@@ -1,4 +1,6 @@
-﻿using NHibernate;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using NHibernate;
 using NHibernate.Context;
 
 namespace Zed.NHibernate {
@@ -6,7 +8,7 @@ namespace Zed.NHibernate {
     /// NHibernate Unit of Work Root Scope
     /// </summary>
     /// <remarks>Based on article: http://www.planetgeek.ch/2012/05/05/what-is-that-all-about-the-repository-anti-pattern/ </remarks>
-    class NHibernateUnitOfWorkRootScope : NHibernateUnitOfWorkScope {
+    public class NHibernateUnitOfWorkRootScope : NHibernateUnitOfWorkScope {
 
         #region Fields and Properties
         #endregion
@@ -23,10 +25,35 @@ namespace Zed.NHibernate {
 
         #region Methods
 
+        /// <summary>
+        /// Begins/starts with transaction
+        /// </summary>
         public override void BeginTransaction() {
             ISession session = SessionFactory.OpenSession();
             CurrentSessionContext.Bind(session);
             base.BeginTransaction();
+        }
+
+        /// <summary>
+        /// This is the asynchronous version of <see cref="BeginTransaction"/>.
+        /// This method invokes the virtual method <see cref="BeginTransactionAsync()"/> with CancellationToken.None.
+        /// Begins/starts with transaction
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public override async Task BeginTransactionAsync() {
+            await base.BeginTransactionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// This is the asynchronous version of <see cref="BeginTransaction"/>.
+        /// Begins/starts with transaction
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public override async Task BeginTransactionAsync(CancellationToken cancellationToken) {
+            ISession session = SessionFactory.OpenSession();
+            CurrentSessionContext.Bind(session);
+            await base.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         }
 
         protected override void Dispose(bool disposing) {

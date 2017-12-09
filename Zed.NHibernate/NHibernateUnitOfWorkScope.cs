@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using NHibernate;
 using Zed.Transaction;
 
@@ -7,7 +9,7 @@ namespace Zed.NHibernate {
     /// NHibernate Unit Of Work scope
     /// </summary>
     /// <remarks>Based on article: http://www.planetgeek.ch/2012/05/05/what-is-that-all-about-the-repository-anti-pattern/ </remarks>
-    class NHibernateUnitOfWorkScope : IUnitOfWorkScope {
+    public class NHibernateUnitOfWorkScope : IUnitOfWorkScope {
 
         #region Fields and Properties
 
@@ -57,6 +59,9 @@ namespace Zed.NHibernate {
 
         #region Methods
 
+        /// <summary>
+        /// Begins/starts with transaction
+        /// </summary>
         public virtual void BeginTransaction() {
             if (Transaction != null && !Transaction.IsActive) {
                 isTransactionCreated = true;
@@ -64,6 +69,32 @@ namespace Zed.NHibernate {
             }
         }
 
+        /// <summary>
+        /// This is the asynchronous version of <see cref="BeginTransaction"/>.
+        /// This method invokes the virtual method <see cref="BeginTransactionAsync()"/> with CancellationToken.None.
+        /// Begins/starts with transaction
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task BeginTransactionAsync() {
+            await BeginTransactionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// This is the asynchronous version of <see cref="BeginTransaction"/>.
+        /// Begins/starts with transaction
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task BeginTransactionAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            BeginTransaction();
+            await Task.CompletedTask.ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Commits transaction
+        /// </summary>
         public virtual void Commit() {
             isScopeCompleted = true;
             if (isTransactionCreated) {
@@ -71,11 +102,60 @@ namespace Zed.NHibernate {
             }
         }
 
+        /// <summary>
+        /// Commits transaction
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task CommitAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            isScopeCompleted = true;
+            if (isTransactionCreated) {
+                await Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Commits transaction
+        /// This method invokes the virtual method <see cref="CommitAsync()"/> with CancellationToken.None.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task CommitAsync() {
+            await CommitAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Rollbacks transaction
+        /// </summary>
         public virtual void Rollback() {
             isScopeCompleted = true;
             if (isTransactionCreated) {
                 Transaction.Rollback();    
             }
+        }
+
+        /// <summary>
+        /// Rollbacks transaction
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task RollbackAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            isScopeCompleted = true;
+            if (isTransactionCreated) {
+                await Transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// Rollbacks transaction
+        /// This method invokes the virtual method <see cref="RollbackAsync()"/> with CancellationToken.None.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        public virtual async Task RollbackAsync() {
+            await RollbackAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         public void Dispose() {
