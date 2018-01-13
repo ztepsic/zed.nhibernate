@@ -15,7 +15,7 @@
     <copyright>Copyright 2014</copyright>
     <tags>Zed NHibernate</tags>
     <dependencies>
-      <dependency id="Zed" version="[1.2,)" />
+      <dependency id="Zed" version="[1.2.2,)" />
       <dependency id="NHibernate" version="[5.0,)" />
     </dependencies>
   </metadata>
