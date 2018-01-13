@@ -43,6 +43,22 @@ namespace Zed.NHibernate {
         /// </summary>
         private bool isScopeCompleted;
 
+        /// <summary>
+        /// An indicator if transaction is active or not
+        /// </summary>
+        /// <returns></returns>
+        public bool IsTransactionActive => Transaction.IsActive;
+
+        /// <summary>
+        /// An indication if implicit transactions are enabled
+        /// </summary>
+        private readonly bool isImplicitTransactionsEnabled;
+
+        /// <summary>
+        /// Gets an indication if implicit transactions are enabled
+        /// </summary>
+        public bool IsImplicitTransactionsEnabled => isImplicitTransactionsEnabled;
+
         #endregion
 
         #region Constructors and Init
@@ -51,8 +67,10 @@ namespace Zed.NHibernate {
         /// Creates NHibernate unit of work scope
         /// </summary>
         /// <param name="sessionFactory">NHibernate session factory</param>
-        public NHibernateUnitOfWorkScope(ISessionFactory sessionFactory) {
+        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
+        public NHibernateUnitOfWorkScope(ISessionFactory sessionFactory, bool isImplicitTransactionsEnabled = false) {
             this.sessionFactory = sessionFactory;
+            this.isImplicitTransactionsEnabled = isImplicitTransactionsEnabled;
         }
 
         #endregion
@@ -99,6 +117,11 @@ namespace Zed.NHibernate {
             isScopeCompleted = true;
             if (isTransactionCreated) {
                 Transaction.Commit();
+
+                if (isImplicitTransactionsEnabled) {
+                    isScopeCompleted = false;
+                    BeginTransaction();
+                }
             }
         }
 
@@ -113,6 +136,11 @@ namespace Zed.NHibernate {
             isScopeCompleted = true;
             if (isTransactionCreated) {
                 await Transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+
+                if (isImplicitTransactionsEnabled) {
+                    isScopeCompleted = false;
+                    await BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
@@ -131,7 +159,12 @@ namespace Zed.NHibernate {
         public virtual void Rollback() {
             isScopeCompleted = true;
             if (isTransactionCreated) {
-                Transaction.Rollback();    
+                Transaction.Rollback();
+
+                if (isImplicitTransactionsEnabled) {
+                    isScopeCompleted = false;
+                    BeginTransaction();
+                }
             }
         }
 
@@ -146,6 +179,11 @@ namespace Zed.NHibernate {
             isScopeCompleted = true;
             if (isTransactionCreated) {
                 await Transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+
+                if (isImplicitTransactionsEnabled) {
+                    isScopeCompleted = false;
+                    await BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 

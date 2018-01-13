@@ -18,6 +18,17 @@ namespace Zed.NHibernate {
         private readonly Func<IUnitOfWorkScope> rootScopeFactory;
         private readonly Func<IUnitOfWorkScope> dependentScopeFactory;
 
+        /// <summary>
+        /// An indication if implicit transactions are enabled
+        /// </summary>
+        private readonly bool isImplicitTransactionsEnabled;
+
+        /// <summary>
+        /// Gets an indication if implicit transactions are enabled
+        /// </summary>
+        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
+        public bool IsImplicitTransactionsEnabled => isImplicitTransactionsEnabled;
+
         #endregion
 
         #region Constructors and Init
@@ -26,10 +37,12 @@ namespace Zed.NHibernate {
         /// Creates NHibernate Unit of Work with default root and dependent scopes
         /// </summary>
         /// <param name="sessionFactory">NHibernate session factory</param>
-        public NHibernateUnitOfWork(ISessionFactory sessionFactory) 
+        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
+        public NHibernateUnitOfWork(ISessionFactory sessionFactory, bool isImplicitTransactionsEnabled = false) 
             : this(sessionFactory,
-            () => new NHibernateUnitOfWorkRootScope(sessionFactory),
-            () => new NHibernateUnitOfWorkScope(sessionFactory)) { }
+            () => new NHibernateUnitOfWorkRootScope(sessionFactory, isImplicitTransactionsEnabled),
+            () => new NHibernateUnitOfWorkScope(sessionFactory, isImplicitTransactionsEnabled),
+            isImplicitTransactionsEnabled) { }
 
         /// <summary>
         /// Creates NHibernate Unit of Work
@@ -37,10 +50,12 @@ namespace Zed.NHibernate {
         /// <param name="sessionFactory">NHibernate session factory</param>
         /// <param name="rootScopeFactory">Root transaction scope</param>
         /// <param name="dependentScopeFactory">Dependant transaction scope</param>
-        public NHibernateUnitOfWork(ISessionFactory sessionFactory, Func<IUnitOfWorkScope> rootScopeFactory, Func<IUnitOfWorkScope> dependentScopeFactory) {
+        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
+        public NHibernateUnitOfWork(ISessionFactory sessionFactory, Func<IUnitOfWorkScope> rootScopeFactory, Func<IUnitOfWorkScope> dependentScopeFactory, bool isImplicitTransactionsEnabled = false) {
             this.sessionFactory = sessionFactory;
             this.rootScopeFactory = rootScopeFactory;
             this.dependentScopeFactory = dependentScopeFactory;
+            this.isImplicitTransactionsEnabled = isImplicitTransactionsEnabled;
         }
 
         #endregion
@@ -56,7 +71,9 @@ namespace Zed.NHibernate {
                 ? rootScopeFactory()
                 : dependentScopeFactory();
 
+            //if (IsImplicitTransactionsEnabled) { scope.BeginTransaction(); }
             scope.BeginTransaction();
+
             return scope;
         }
 

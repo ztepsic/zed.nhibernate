@@ -19,7 +19,8 @@ namespace Zed.NHibernate {
         /// Creates NHibernate unit of work root scope
         /// </summary>
         /// <param name="sessionFactory">NHibernate session factory</param>
-        public NHibernateUnitOfWorkRootScope(ISessionFactory sessionFactory) : base(sessionFactory) { }
+        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
+        public NHibernateUnitOfWorkRootScope(ISessionFactory sessionFactory, bool isImplicitTransactionsEnabled = false) : base(sessionFactory, isImplicitTransactionsEnabled) { }
 
         #endregion
 

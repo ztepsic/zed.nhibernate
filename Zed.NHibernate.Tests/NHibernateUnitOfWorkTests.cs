@@ -128,5 +128,40 @@ namespace Zed.NHibernate.Tests {
             Assert.IsNotNull(result2);
             Assert.AreEqual(tag2, result2);
         }
+
+        [Test]
+        public void StartAsync_CreatesNHibernateUnitOfWorkAndBeginsWithOneScopesOnOneTransaction() {
+            // Arrange
+            Tag tag1 = Tag.CreateBaseTag("tag1");
+            Tag tag2 = Tag.CreateBaseTag("tag2");
+            Tag result1;
+            Tag result2;
+
+            // Act
+            var unitOfWork = new NHibernateUnitOfWork(SessionFactory, true);
+            using (var unitOfWorkRootScope = unitOfWork.Start()) {
+                Session.SaveOrUpdate(tag1);
+                unitOfWorkRootScope.Commit();
+
+                Session.SaveOrUpdate(tag2);
+                unitOfWorkRootScope.Rollback();
+
+
+            }
+
+            using (var unitOfWorkRootScope = unitOfWork.Start()) {
+                result1 = Session.Get<Tag>(1);
+                result2 = Session.Get<Tag>(2);
+            }
+
+
+            // Assert
+            Assert.IsNotNull(result1);
+            Assert.AreEqual(tag1, result1);
+
+            Assert.IsNull(result2);
+
+            
+        }
     }
 }
