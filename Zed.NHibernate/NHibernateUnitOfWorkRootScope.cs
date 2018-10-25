@@ -57,6 +57,10 @@ namespace Zed.NHibernate {
             await base.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing) {
             base.Dispose(disposing);
             if (disposing) {

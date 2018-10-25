@@ -92,6 +92,9 @@ namespace Zed.NHibernate.Test {
             session.Close();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         protected void BuildSchema() {
             var cfg = Configuration;
             var schemaExport = new SchemaExport(cfg);

@@ -196,11 +196,18 @@ namespace Zed.NHibernate {
             await RollbackAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose() {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
                 if (!isScopeCompleted && Transaction.IsActive) {

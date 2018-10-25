@@ -26,7 +26,6 @@ namespace Zed.NHibernate {
         /// <summary>
         /// Gets an indication if implicit transactions are enabled
         /// </summary>
-        /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
         public bool IsImplicitTransactionsEnabled => isImplicitTransactionsEnabled;
 
         #endregion
