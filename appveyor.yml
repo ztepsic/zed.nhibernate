@@ -1,7 +1,7 @@
 environment:
   version_major: 1
-  version_minor: 2
-  version_patch: 2
+  version_minor: 3
+  version_patch: 0
 version: $(version_major).$(version_minor).$(version_patch).{build}
 skip_tags: true
 image: Visual Studio 2017

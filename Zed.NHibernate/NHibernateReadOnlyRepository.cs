@@ -85,6 +85,19 @@ namespace Zed.NHibernate {
         }
 
         /// <summary>
+        /// Return the persistent instance of the given entity class with the given identifier,
+        /// assuming that the instnace exists.
+        /// </summary>
+        /// <param name="id">A valid identifier of an existing persistent instance of the class</param>
+        /// <returns>Entity/aggregate root</returns>
+        /// <remarks>
+        /// Load never return null. It will always return an entity or throw an exception.
+        /// It is permissible for Load to not hit the database (no query/select against a database) when it is called,
+        /// it is free to return a proxy instead.
+        /// </remarks>
+        public virtual TEntity Load(TId id) => Session.Load<TEntity>(id);
+
+        /// <summary>
         /// This is the asynchronous version of <see cref="GetById"/>.
         /// Gets entity/aggregate root bases on it's identity.
         /// </summary>
@@ -102,6 +115,38 @@ namespace Zed.NHibernate {
         /// <returns>Entity/aggregate root</returns>
         public virtual async Task<TEntity> GetByIdAsync(TId id) {
             return await GetByIdAsync(id, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Return the persistent instance of the given entity class with the given identifier,
+        /// assuming that the instnace exists.
+        /// </summary>
+        /// <param name="id">A valid identifier of an existing persistent instance of the class</param>
+        /// <param name="cancellationToken">The cancellation instruction.</param>
+        /// <returns>Entity/aggregate root</returns>
+        /// <remarks>
+        /// Load never return null. It will always return an entity or throw an exception.
+        /// It is permissible for Load to not hit the database (no query/select against a database) when it is called,
+        /// it is free to return a proxy instead.
+        /// </remarks>
+        public virtual async Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken) {
+            return await Session.LoadAsync<TEntity>(id, cancellationToken).ConfigureAwait(false);
+        }
+
+
+        /// <summary>
+        /// Return the persistent instance of the given entity class with the given identifier,
+        /// assuming that the instnace exists.
+        /// </summary>
+        /// <param name="id">A valid identifier of an existing persistent instance of the class</param>
+        /// <returns>Entity/aggregate root</returns>
+        /// <remarks>
+        /// Load never return null. It will always return an entity or throw an exception.
+        /// It is permissible for Load to not hit the database (no query/select against a database) when it is called,
+        /// it is free to return a proxy instead.
+        /// </remarks>
+        public virtual async Task<TEntity> LoadAsync(TId id) {
+            return await LoadAsync(id, CancellationToken.None).ConfigureAwait(false);
         }
 
         #endregion
