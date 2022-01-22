@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NHibernate;
+using NHibernate.Context;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using NHibernate;
-using NHibernate.Context;
 using Zed.Transaction;
 
 namespace Zed.NHibernate {

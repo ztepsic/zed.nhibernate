@@ -1,9 +1,9 @@
-﻿using System;
-using System.Data.Common;
-using NHibernate;
+﻿using NHibernate;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;
 using NHibernate.UserTypes;
+using System;
+using System.Data.Common;
 
 namespace Zed.NHibernate {
     /// <summary>

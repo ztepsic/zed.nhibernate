@@ -1,9 +1,9 @@
-﻿using System;
-using log4net;
+﻿using log4net;
 using NHibernate;
 using NHibernate.Cfg;
 using NHibernate.Context;
 using NHibernate.Tool.hbm2ddl;
+using System;
 
 namespace Zed.NHibernate.Test {
     /// <summary>

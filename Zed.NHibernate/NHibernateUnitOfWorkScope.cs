@@ -1,7 +1,7 @@
-﻿using System;
+﻿using NHibernate;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using NHibernate;
 using Zed.Transaction;
 
 namespace Zed.NHibernate {
@@ -31,7 +31,7 @@ namespace Zed.NHibernate {
         /// <summary>
         /// Gets NHibernate transaction
         /// </summary>
-        protected ITransaction Transaction { get { return Session.Transaction; } }
+        protected ITransaction Transaction { get { return Session.GetCurrentTransaction(); } }
 
         /// <summary>
         /// Indicates if transaction is created
@@ -81,7 +81,7 @@ namespace Zed.NHibernate {
         /// Begins/starts with transaction
         /// </summary>
         public virtual void BeginTransaction() {
-            if (Transaction != null && !Transaction.IsActive) {
+            if (!(Transaction?.IsActive ?? false)) {
                 isTransactionCreated = true;
                 Session.BeginTransaction();
             }
@@ -210,12 +210,15 @@ namespace Zed.NHibernate {
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                if (!isScopeCompleted && Transaction.IsActive) {
+
+                if (!isScopeCompleted && (Transaction?.IsActive ?? false))
+                {
                     Rollback();
                 }
 
                 if (isTransactionCreated) {
-                    Transaction.Dispose();
+                    
+                    Transaction?.Dispose();
                 }
             }
         }

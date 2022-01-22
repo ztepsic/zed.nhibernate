@@ -1,10 +1,10 @@
-﻿using System.Data.SQLite;
-using System.Threading.Tasks;
-using NHibernate.Cfg;
+﻿using NHibernate.Cfg;
 using NHibernate.Dialect;
 using NHibernate.Driver;
 using NHibernate.Mapping.ByCode;
 using NUnit.Framework;
+using System.Data.SQLite;
+using System.Threading.Tasks;
 using Zed.NHibernate.Test;
 using Zed.NHibernate.Tests.Model;
 
@@ -146,14 +146,12 @@ namespace Zed.NHibernate.Tests {
                 Session.SaveOrUpdate(tag2);
                 unitOfWorkRootScope.Rollback();
 
-
             }
 
             using (var unitOfWorkRootScope = unitOfWork.Start()) {
                 result1 = Session.Get<Tag>(1);
                 result2 = Session.Get<Tag>(2);
             }
-
 
             // Assert
             Assert.IsNotNull(result1);

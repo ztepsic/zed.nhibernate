@@ -1,10 +1,10 @@
 environment:
-  version_major: 1
-  version_minor: 3
+  version_major: 2
+  version_minor: 0
   version_patch: 0
 version: $(version_major).$(version_minor).$(version_patch).{build}
 skip_tags: true
-image: Visual Studio 2017
+image: Visual Studio 2022
 configuration: Release
 assembly_info:
   patch: true
@@ -12,12 +12,20 @@ assembly_info:
   assembly_version: '$(version_major).0.0.0'
   assembly_file_version: '{version}'
   assembly_informational_version: '$(version_major).$(version_minor).$(version_patch)'
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '$(version_major).$(version_minor).$(version_patch)'
+  package_version: '{version}'
+  assembly_version: '$(version_major).0.0.0'
+  file_version: '{version}'
+  informational_version: '$(version_major).$(version_minor).$(version_patch)'
 before_build:
-- cmd: nuget restore
+- cmd: dotnet restore
 build:
   verbosity: minimal
 after_build:
-- cmd: Zed.NHibernate_build_nuget.bat
+- cmd: dotnet pack Zed.NHibernate/Zed.NHibernate.csproj --configuration Release --output ./
 artifacts:
 - path: Zed.NHibernate.$(version_major).$(version_minor).$(version_patch).nupkg
   name: Zed.NHibernate.$(version_major).$(version_minor).$(version_patch).nupkg

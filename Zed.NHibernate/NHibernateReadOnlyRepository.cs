@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using NHibernate;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using NHibernate;
 using Zed.Domain;
 
 namespace Zed.NHibernate {

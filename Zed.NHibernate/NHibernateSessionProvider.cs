@@ -1,6 +1,6 @@
-﻿using System;
-using NHibernate;
+﻿using NHibernate;
 using NHibernate.Cfg;
+using System;
 
 namespace Zed.NHibernate {
     /// <summary>

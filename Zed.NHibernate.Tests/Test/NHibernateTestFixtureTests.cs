@@ -1,10 +1,10 @@
-﻿using System.Data.SQLite;
-using System.Threading.Tasks;
-using NHibernate.Bytecode;
+﻿using NHibernate.Bytecode;
 using NHibernate.Cfg;
 using NHibernate.Dialect;
 using NHibernate.Driver;
 using NUnit.Framework;
+using System.Data.SQLite;
+using System.Threading.Tasks;
 using Zed.NHibernate.Test;
 
 namespace Zed.NHibernate.Tests.Test {
@@ -15,7 +15,7 @@ namespace Zed.NHibernate.Tests.Test {
 
         static NHibernateTestFixtureTests() {
             TestConnectionProvider.CreateConnectionFunc = connString => new SQLiteConnection(connString);
-            Configuration.Proxy(p => p.ProxyFactoryFactory<DefaultProxyFactoryFactory>())
+            Configuration.Proxy(p => p.ProxyFactoryFactory<StaticProxyFactoryFactory>())
                 .DataBaseIntegration(db => {
                     db.Dialect<SQLiteDialect>();
                     db.Driver<SQLite20Driver>();
