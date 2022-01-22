@@ -12,6 +12,8 @@
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ztepsic/zed.nhibernate</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/ztepsic/zed.nhibernate</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageTags>Zed NHibernate</PackageTags>
     <Copyright>Copyright 2022</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
