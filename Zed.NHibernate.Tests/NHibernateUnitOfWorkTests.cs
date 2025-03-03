@@ -80,18 +80,19 @@ namespace Zed.NHibernate.Tests {
                 unitOfWorkRootScope.Commit();
             }
 
-            using(var unitOfWorkRootScope = unitOfWork.Start()) {
+            using (var unitOfWorkRootScope = unitOfWork.Start()) {
                 result1 = Session.Get<Tag>(1);
                 result2 = Session.Get<Tag>(2);
             }
 
 
             // Assert
-            Assert.IsNotNull(result1);
-            Assert.AreEqual(tag1, result1);
+            Assert.That(result1, Is.Not.Null);
+            Assert.That(result1, Is.EqualTo(tag1));
 
-            Assert.IsNotNull(result2);
-            Assert.AreEqual(tag2, result2);
+            Assert.That(result2, Is.Not.Null);
+            Assert.That(result2, Is.EqualTo(tag2));
+
         }
 
         [Test]
@@ -122,11 +123,11 @@ namespace Zed.NHibernate.Tests {
 
 
             // Assert
-            Assert.IsNotNull(result1);
-            Assert.AreEqual(tag1, result1);
+            Assert.That(result1, Is.Not.Null);
+            Assert.That(result1, Is.EqualTo(tag1));
 
-            Assert.IsNotNull(result2);
-            Assert.AreEqual(tag2, result2);
+            Assert.That(result2, Is.Not.Null);
+            Assert.That(result2, Is.EqualTo(tag2));
         }
 
         [Test]
@@ -154,12 +155,11 @@ namespace Zed.NHibernate.Tests {
             }
 
             // Assert
-            Assert.IsNotNull(result1);
-            Assert.AreEqual(tag1, result1);
+            Assert.That(result1, Is.Not.Null);
+            Assert.That(result1, Is.EqualTo(tag1));
 
-            Assert.IsNull(result2);
+            Assert.That(result2, Is.Null);
 
-            
         }
     }
 }
