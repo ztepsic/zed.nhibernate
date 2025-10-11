@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Publish
+description: Publish NuGet package to nuget.org for specified tag
+on:
+  workflow_dispatch: # Allow running the workflow manually from the GitHub UI
+    inputs:
+      tag:
+        description: "Tag to publish"
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: 6.x
+  NUGET_DIR: ${{github.workspace}}/nuget
+
+jobs:
+  publish:
+    name: Publish (NuGet)
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Publish NuGet
+        uses: ./.github/actions/publish-nuget
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+          tag: ${{ github.event.inputs.tag }}
+          nuget-dir: ${{env.NUGET_DIR}}
+          nuget-source: ${{vars.NUGET_SOURCE}}
+          nuget-apikey: ${{secrets.NUGET_APIKEY}}

@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Pack NuGet
+description: Pack NuGet package
+
+inputs:
+  dotnet-version:
+    description: "The .NET SDK version"
+    default: "8.x"
+  output-dir:
+    description: "NuGet output directory"
+    default: ${{github.workspace}}/nuget
+  full-sem-ver:
+    description: "The full semantic version"
+    required: true
+  include-symbols:
+    description: "Include symbols and source"
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{inputs.dotnet-version}}
+        #cache: true
+
+    - name: Create NuGet package
+      run: dotnet pack --configuration Release --output ${{inputs.output-dir}} -p:PackageVersion=${{inputs.full-sem-ver}} ${{ inputs.include-symbols && '--include-symbols' || '' }}
+      shell: bash
+
+    - name: Upload NuGet package
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{inputs.output-dir}}/*.nupkg

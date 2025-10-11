@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: Main
+on:
+  workflow_dispatch: # Allow running the workflow manually from the GitHub UI
+  push:
+  pull_request:
+    branches:
+      - "*"
+
+env:
+  DOTNET_VERSION: 9.x
+  NUGET_DIR: ${{github.workspace}}/nuget
+
+jobs:
+  versioning:
+    name: Versioning
+    runs-on: ubuntu-latest
+    outputs:
+      FullSemVer: ${{ steps.versioning.outputs.FullSemVer }} # Job output
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Determine version
+        uses: ./.github/actions/versioning
+        id: versioning
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+
+      - name: Print version
+        run: "echo 'FullSemVer: ${{steps.versioning.outputs.FullSemVer}}'"
+        shell: bash
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+          # cache: true
+
+      - name: Restore dependencies
+        run: dotnet restore --locked-mode
+
+      - name: Build
+        run: |
+          dotnet build \
+            --configuration Release \
+            --no-restore
+
+      # - name: Upload build artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build
+      #     path: |
+      #       **/bin/
+      #       **/obj/
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # - name: Download build artifacts
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: build
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+          #cache: true
+
+      - name: Run tests
+        run: |
+          dotnet test \
+            --configuration Release \
+            --logger "trx" \
+            --results-directory "TestResults" \
+            --logger:"junit;LogFilePath=../TestResults/{assembly}_junit.test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose" \
+            -p:CollectCoverage=true \
+            -p:CoverletOutput="../TestResults/" \
+            -p:CoverletOutputFormat=\"json,cobertura,opencover\"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+        if: ${{always()}}
+
+  pack:
+    name: Pack (NuGet)
+    runs-on: ubuntu-latest
+    needs: [versioning, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Create NuGet
+        uses: ./.github/actions/pack-nuget
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+          output-dir: ${{env.NUGET_DIR}}
+          full-sem-ver: ${{needs.versioning.outputs.FullSemVer}}
+          include-symbols: true
+
+  publish:
+    name: Publish (NuGet)
+    runs-on: ubuntu-latest
+    needs: pack
+    environment:
+      # name: ${{ github.ref == 'refs/heads/master' && 'prod' || 'dev' }}
+      name: ${{ 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Publish NuGet
+        uses: ./.github/actions/publish-nuget
+        with:
+          dotnet-version: ${{env.DOTNET_VERSION}}
+          nuget-dir: ${{env.NUGET_DIR}}
+          nuget-source: ${{vars.NUGET_SOURCE}}
+          # nuget-apikey: ${{ github.ref == 'refs/heads/master' && secrets.NUGET_APIKEY || secrets.GITHUB_TOKEN }}
+          nuget-apikey: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    name: Release (NuGet)
+    runs-on: ubuntu-latest
+    needs: [versioning, pack]
+    if: ${{ github.ref == 'refs/heads/master' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Get all history to allow automatic versioning
+
+      - name: Release NuGet
+        uses: ./.github/actions/release-nuget
+        with:
+          nuget-dir: ${{env.NUGET_DIR}}
+          full-sem-ver: ${{needs.versioning.outputs.FullSemVer}}
+          github-token: ${{secrets.GITHUB_TOKEN}}

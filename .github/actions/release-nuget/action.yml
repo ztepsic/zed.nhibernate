@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Release NuGet
+description: Release NuGet package
+
+inputs:
+  nuget-dir:
+    description: "NuGet output directory"
+    default: ${{github.workspace}}/nuget
+  full-sem-ver:
+    description: "The full semantic version"
+    required: true
+  github-token:
+    description: "GitHub token"
+    required: true
+  draft:
+    description: "Create a draft release"
+    required: false
+    default: false
+
+runs:
+  using: "composite"
+  steps:
+    # Download the NuGet package created in the previous job
+    - name: Download NuGet package
+      uses: actions/download-artifact@v4
+      with:
+        name: nuget
+        path: ${{inputs.nuget-dir}}
+
+    # - name: Install GitReleaseManager
+    #   uses: gittools/actions/gitreleasemanager/setup@v3.1.11
+    #   with:
+    #     versionSpec: "0.18.x"
+
+    # - name: Create release with GitReleaseManager
+    #   uses: gittools/actions/gitreleasemanager/create@v3.1.11
+    #   with:
+    #     token: ${{secrets.GITHUB_TOKEN}}
+    #     owner: "ztepsic"
+    #     repository: "zed"
+    #     milestone: v${{needs.versioning.outputs.FullSemVer}}
+    #     name: v${{needs.versioning.outputs.FullSemVer}}
+    #     assets: |
+    #       ${{inputs.nuget-dir}}/*.nupkg
+
+    - name: Install conventional-changelog
+      run: npm install -g conventional-changelog-cli
+      shell: bash
+
+    - name: Generate Changelog
+      run: conventional-changelog -p conventionalcommits -o CHANGELOG.md
+      shell: bash
+
+    - name: Create Tag
+      run: |
+        git tag v${{inputs.full-sem-ver}}
+        git push origin v${{inputs.full-sem-ver}}
+      shell: bash
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{inputs.github-token}}
+        tag_name: v${{inputs.full-sem-ver}}
+        name: v${{inputs.full-sem-ver}}
+        body_path: CHANGELOG.md
+        draft: ${{inputs.draft}}
+        prerelease: false
+        files: |
+          ${{inputs.nuget-dir}}/*.nupkg

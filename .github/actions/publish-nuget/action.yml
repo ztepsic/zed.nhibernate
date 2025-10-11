@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+
+name: Publish NuGet
+description: Publish NuGet package
+
+inputs:
+  dotnet-version:
+    description: "The .NET SDK version"
+    default: "8.x"
+  nuget-dir:
+    description: "NuGet output directory"
+    default: ${{github.workspace}}/nuget
+  nuget-source:
+    description: "NuGet source URL"
+    required: true
+  nuget-apikey:
+    description: "NuGet API key"
+    required: true
+  tag:
+    description: "Tag from which asset to download"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    # Download the NuGet package created in the previous job
+    - name: Download NuGet package
+      uses: actions/download-artifact@v4
+      if: inputs.tag == ''
+      with:
+        name: nuget
+        path: ${{inputs.nuget-dir}}
+
+    - name: Download build artifact from tag
+      uses: robinraju/release-downloader@v1.11
+      if: inputs.tag != ''
+      with:
+        tag: ${{inputs.tag}}
+        fileName: "*.nupkg"
+        out-file-path: ${{inputs.nuget-dir}}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{inputs.dotnet-version}}
+        #cache: true
+
+      # Publish all NuGet packages to NuGet repository
+      # Use --skip-duplicate to prevent errors if a package with the same version already exists.
+      # If you retry a failed workflow, already published packages will be skipped without error.
+    - name: Publish NuGet package
+      run: |
+        foreach($file in (Get-ChildItem "${{inputs.nuget-dir}}" -Recurse -Include *.nupkg)) {
+            dotnet nuget push $file --api-key "${{inputs.nuget-apikey}}" --source "${{inputs.nuget-source}}" --skip-duplicate
+        }
+      shell: pwsh
