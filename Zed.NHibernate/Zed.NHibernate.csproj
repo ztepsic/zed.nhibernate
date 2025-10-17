@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <Version>2.0.0</Version>
     <PackageId>Zed.NHibernate</PackageId>
     <Title>Zed.NHibernate</Title>
@@ -12,17 +14,16 @@
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ztepsic/zed.nhibernate</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/ztepsic/zed.nhibernate</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ztepsic/zed.nhibernate</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Zed NHibernate</PackageTags>
     <Copyright>Copyright 2022</Copyright>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="log4net" Version="3.2.0" />
-    <PackageReference Include="NHibernate" Version="5.6.0" />
-    <PackageReference Include="Zed" Version="2.2.0" />
+    <PackageReference Include="log4net" />
+    <PackageReference Include="NHibernate" />
+    <PackageReference Include="Zed" />
   </ItemGroup> 
 
 </Project>
