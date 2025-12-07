@@ -11,7 +11,7 @@ on:
         type: string
 
 env:
-  DOTNET_VERSION: 6.x
+  DOTNET_VERSION: 10.x
   NUGET_DIR: ${{github.workspace}}/nuget
 
 jobs:

@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="appveyor.yml" />
+  </Folder>
+  <Project Path="Zed.NHibernate.Tests/Zed.NHibernate.Tests.csproj" />
+  <Project Path="Zed.NHibernate/Zed.NHibernate.csproj" />
+</Solution>
