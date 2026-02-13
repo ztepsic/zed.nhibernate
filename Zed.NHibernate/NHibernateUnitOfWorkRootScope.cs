@@ -67,7 +67,19 @@ namespace Zed.NHibernate {
                 ISession session = CurrentSessionContext.Unbind(SessionFactory);
                 if (session != null) {
                     session.Close();
-                    session.Dispose();    
+                    session.Dispose();
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask DisposeAsync(bool disposing) {
+            base.Dispose(disposing);
+            if (disposing) {
+                ISession session = CurrentSessionContext.Unbind(SessionFactory);
+                if (session != null) {
+                    session.Close();
+                    session.Dispose();
                 }
             }
         }
