@@ -10,11 +10,11 @@ using Zed.NHibernate.Tests.Model;
 
 namespace Zed.NHibernate.Tests {
     [TestFixture]
-    public class NHibernateUnitOfWorkTests : NHibernateTestFixture {
+    public class NHibernateUnitOfWorkManagerTests : NHibernateTestFixture {
 
         private const string CONNECTION_STRING = "Data Source=:memory:;Version=3;New=True;";
 
-        static NHibernateUnitOfWorkTests() {
+        static NHibernateUnitOfWorkManagerTests() {
             TestConnectionProvider.CreateConnectionFunc = connString => new SQLiteConnection(connString);
             Configuration.DataBaseIntegration(db => {
                 db.Dialect<SQLiteDialect>();
@@ -68,7 +68,7 @@ namespace Zed.NHibernate.Tests {
             Tag result2;
 
             // Act
-            var unitOfWork = new NHibernateUnitOfWork(SessionFactory);
+            var unitOfWork = new NHibernateUnitOfWorkManager(SessionFactory);
             using (var unitOfWorkRootScope = unitOfWork.Start()) {
                 Session.SaveOrUpdate(tag1);
 
@@ -104,7 +104,7 @@ namespace Zed.NHibernate.Tests {
             Tag result2;
 
             // Act
-            var unitOfWork = new NHibernateUnitOfWork(SessionFactory);
+            var unitOfWork = new NHibernateUnitOfWorkManager(SessionFactory);
             using (var unitOfWorkRootScope = await unitOfWork.StartAsync()) {
                 Session.SaveOrUpdate(tag1);
 
@@ -139,7 +139,7 @@ namespace Zed.NHibernate.Tests {
             Tag result2;
 
             // Act
-            var unitOfWork = new NHibernateUnitOfWork(SessionFactory, true);
+            var unitOfWork = new NHibernateUnitOfWorkManager(SessionFactory, true);
             using (var unitOfWorkRootScope = unitOfWork.Start()) {
                 Session.SaveOrUpdate(tag1);
                 unitOfWorkRootScope.Commit();

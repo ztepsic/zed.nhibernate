@@ -9,7 +9,7 @@ namespace Zed.NHibernate {
     /// NHibernate Unit Of Work scope
     /// </summary>
     /// <remarks>Based on article: http://www.planetgeek.ch/2012/05/05/what-is-that-all-about-the-repository-anti-pattern/ </remarks>
-    public class NHibernateUnitOfWorkScope : IUnitOfWorkScope {
+    public class NHibernateUnitOfWorkScope : IUnitOfWork {
 
         #region Fields and Properties
 
@@ -211,13 +211,31 @@ namespace Zed.NHibernate {
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
 
-                if (!isScopeCompleted && (Transaction?.IsActive ?? false))
-                {
+                if (!isScopeCompleted && (Transaction?.IsActive ?? false)) {
                     Rollback();
                 }
 
                 if (isTransactionCreated) {
-                    
+
+                    Transaction?.Dispose();
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public async ValueTask DisposeAsync() {
+            await DisposeAsync(true).ConfigureAwait(false);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual async ValueTask DisposeAsync(bool disposing) {
+            if (disposing) {
+                if (!isScopeCompleted && (Transaction?.IsActive ?? false)) {
+                    await RollbackAsync();
+                }
+
+                if (isTransactionCreated) {
+
                     Transaction?.Dispose();
                 }
             }
