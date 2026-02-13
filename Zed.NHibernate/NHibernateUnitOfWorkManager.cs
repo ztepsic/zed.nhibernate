@@ -7,16 +7,16 @@ using Zed.Transaction;
 
 namespace Zed.NHibernate {
     /// <summary>
-    /// NHibernate unit of work
+    /// NHibernate unit of work manager
     /// </summary>
     /// <remarks>Based on article: http://www.planetgeek.ch/2012/05/05/what-is-that-all-about-the-repository-anti-pattern/ </remarks>
-    public class NHibernateUnitOfWork : IUnitOfWork {
+    public class NHibernateUnitOfWorkManager : IUnitOfWorkManager {
 
         #region Fields and Properties
 
         private readonly ISessionFactory sessionFactory;
-        private readonly Func<IUnitOfWorkScope> rootScopeFactory;
-        private readonly Func<IUnitOfWorkScope> dependentScopeFactory;
+        private readonly Func<IUnitOfWork> rootScopeFactory;
+        private readonly Func<IUnitOfWork> dependentScopeFactory;
 
         /// <summary>
         /// An indication if implicit transactions are enabled
@@ -37,7 +37,7 @@ namespace Zed.NHibernate {
         /// </summary>
         /// <param name="sessionFactory">NHibernate session factory</param>
         /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
-        public NHibernateUnitOfWork(ISessionFactory sessionFactory, bool isImplicitTransactionsEnabled = false) 
+        public NHibernateUnitOfWorkManager(ISessionFactory sessionFactory, bool isImplicitTransactionsEnabled = false)
             : this(sessionFactory,
             () => new NHibernateUnitOfWorkRootScope(sessionFactory, isImplicitTransactionsEnabled),
             () => new NHibernateUnitOfWorkScope(sessionFactory, isImplicitTransactionsEnabled),
@@ -50,7 +50,7 @@ namespace Zed.NHibernate {
         /// <param name="rootScopeFactory">Root transaction scope</param>
         /// <param name="dependentScopeFactory">Dependant transaction scope</param>
         /// <param name="isImplicitTransactionsEnabled">An indication if implicit transactions are enabled. Default is false.</param>
-        public NHibernateUnitOfWork(ISessionFactory sessionFactory, Func<IUnitOfWorkScope> rootScopeFactory, Func<IUnitOfWorkScope> dependentScopeFactory, bool isImplicitTransactionsEnabled = false) {
+        public NHibernateUnitOfWorkManager(ISessionFactory sessionFactory, Func<IUnitOfWork> rootScopeFactory, Func<IUnitOfWork> dependentScopeFactory, bool isImplicitTransactionsEnabled = false) {
             this.sessionFactory = sessionFactory;
             this.rootScopeFactory = rootScopeFactory;
             this.dependentScopeFactory = dependentScopeFactory;
@@ -65,8 +65,8 @@ namespace Zed.NHibernate {
         /// Starts unit of work scope
         /// </summary>
         /// <returns>Unit of work scope</returns>
-        public IUnitOfWorkScope Start() {
-            IUnitOfWorkScope scope = !CurrentSessionContext.HasBind(sessionFactory)
+        public IUnitOfWork Start() {
+            IUnitOfWork scope = !CurrentSessionContext.HasBind(sessionFactory)
                 ? rootScopeFactory()
                 : dependentScopeFactory();
 
@@ -80,7 +80,7 @@ namespace Zed.NHibernate {
         /// Starts async unit of work scope
         /// </summary>
         /// <returns>Unit of work scope</returns>
-        public async Task<IUnitOfWorkScope> StartAsync() {
+        public async Task<IUnitOfWork> StartAsync() {
             return await StartAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -89,10 +89,10 @@ namespace Zed.NHibernate {
         /// </summary>
         /// <param name="cancellationToken">The cancellation instruction.</param>
         /// <returns>Unit of work scope</returns>
-        public async Task<IUnitOfWorkScope> StartAsync(CancellationToken cancellationToken) {
+        public async Task<IUnitOfWork> StartAsync(CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
 
-            IUnitOfWorkScope scope = !CurrentSessionContext.HasBind(sessionFactory)
+            IUnitOfWork scope = !CurrentSessionContext.HasBind(sessionFactory)
                 ? rootScopeFactory()
                 : dependentScopeFactory();
 
